@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUTONG PINOY</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'home.css' %}">
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="navbar">
+      <img class="logo" src="{% static 'lclogo.png' %}">
+      <ul>
+        <li><a href="{% url 'product' %}">Add Products</a></li>
+        <li><a href="{% url 'view_cart' %}">Cart</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+      </ul>
+    </nav>
+    <div class="center">
+      <h1>Welcome,<br> {{ user.userprofile.firstname }} {{ user.userprofile.lastname }}!</h1>
+      <h3>Enjoy your shopping!</h3>
+    </div>
+    <section>
+      <h1 class="product-heading">New Products</h1>
+      {% for product in latest_products %}
+          <div class="product-item">
+              {% if product.image %}
+                  <img src="{{ product.image.url }}" alt="Product Image">
+              {% endif %}
+              <h3>{{ product.name }}</h3>
+              <p>{{ product.description }}</p>
+              <p>Price: Php. {{ product.price }}</p>
+              <form method="post" action="{% url 'add_to_cart' product.id %}">
+                  {% csrf_token %}
+                  <input type="submit" value="Add to Cart">
+              </form>
+          </div>
+      {% endfor %}
+  </section>
+  <script>
+    // Add event listener for form submission
+    document.querySelectorAll('.add-to-cart-form').forEach(form => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const productId = form.dataset.productId;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(`/add_to_cart/${productId}/`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    // Handle success, e.g., display a success message
+                    console.log('Product added to cart successfully');
+                } else {
+                    // Handle error, e.g., display an error message
+                    console.error('Failed to add product to cart');
+                }
+            } catch (error) {
+                console.error('An unexpected error occurred:', error);
+            }
+        });
+    });
+</script>
+  </div>
+
+</body>
+</html>
